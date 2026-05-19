@@ -6,8 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
-  Alert,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,7 +16,7 @@ import QuickCard from '../components/QuickCard';
 import LanguageToggle from '../components/LanguageToggle';
 import COLORS from '../constants/colors';
 import QUICK_QUESTIONS from '../constants/quickQuestions';
-import { getApiKey, getLanguage, saveLanguage } from '../utils/storage';
+import { getLanguage, saveLanguage, getOnboarded, SECTIONS } from '../utils/storage';
 
 const { width } = Dimensions.get('window');
 
@@ -27,6 +27,7 @@ const FEATURES = [
     titleUr: 'ایف آئی آر',
     descEn: 'Know your rights',
     descUr: 'اپنے حقوق جانیں',
+    section: SECTIONS.CRIMINAL,
   },
   {
     icon: '👩‍⚖️',
@@ -34,6 +35,7 @@ const FEATURES = [
     titleUr: 'خاندانی قانون',
     descEn: 'Marriage & divorce',
     descUr: 'نکاح اور طلاق',
+    section: SECTIONS.FAMILY,
   },
   {
     icon: '🏛️',
@@ -41,6 +43,7 @@ const FEATURES = [
     titleUr: 'عدالتی مدد',
     descEn: 'Procedures & rights',
     descUr: 'طریقہ کار',
+    section: SECTIONS.OTHER,
   },
   {
     icon: '🪪',
@@ -48,27 +51,53 @@ const FEATURES = [
     titleUr: 'نادرا',
     descEn: 'CNIC & documents',
     descUr: 'شناختی کارڈ',
+    section: SECTIONS.OTHER,
+  },
+  {
+    icon: '🏠',
+    titleEn: 'Property Law',
+    titleUr: 'جائیداد کا قانون',
+    descEn: 'Land & property rights',
+    descUr: 'زمین اور جائیداد',
+    section: SECTIONS.PROPERTY,
+  },
+  {
+    icon: '👷',
+    titleEn: 'Labor Law',
+    titleUr: 'مزدور قانون',
+    descEn: 'Worker rights',
+    descUr: 'مزدور کے حقوق',
+    section: SECTIONS.LABOR,
   },
 ];
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [language, setLanguage] = useState('ur');
-  const [hasApiKey, setHasApiKey] = useState(false);
   const [greeting, setGreeting] = useState('');
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   useEffect(() => {
-    loadPreferences();
+    checkOnboarding();
     const hour = new Date().getHours();
-    if (hour < 12) setGreeting('صبح بخیر');
-    else if (hour < 17) setGreeting('دوپہر بخیر');
-    else setGreeting('شام بخیر');
+    if (hour < 12) setGreeting('صبح بخير');
+    else if (hour < 17) setGreeting('دوپہر بخير');
+    else setGreeting('شام بخير');
   }, []);
 
-  const loadPreferences = async () => {
-    const [lang, key] = await Promise.all([getLanguage(), getApiKey()]);
+  const checkOnboarding = async () => {
+    const onboarded = await getOnboarded();
+    if (!onboarded) {
+      router.replace('/onboarding');
+    } else {
+      loadPreferences();
+      setCheckingOnboarding(false);
+    }
+  };
+
+    const loadPreferences = async () => {
+    const lang = await getLanguage();
     setLanguage(lang);
-    setHasApiKey(!!key);
   };
 
   const handleLanguageToggle = async (lang) => {
@@ -79,30 +108,20 @@ export default function HomeScreen() {
   const handleQuickQuestion = useCallback(
     (item) => {
       const question = language === 'ur' ? item.questionUr : item.questionEn;
-      router.push({ pathname: '/chat', params: { initialQuestion: question } });
+      router.push({
+        pathname: '/chat',
+        params: { initialQuestion: question, section: SECTIONS.OTHER },
+      });
     },
     [language]
   );
 
-  const handleNewChat = useCallback(() => {
-    if (!hasApiKey) {
-      Alert.alert(
-        language === 'ur' ? 'API Key درکار ہے' : 'API Key Required',
-        language === 'ur'
-          ? 'براہ کرم پہلے سیٹنگز میں اپنی Gemini API Key درج کریں۔'
-          : 'Please add your Gemini API Key in Settings first.',
-        [
-          {
-            text: language === 'ur' ? 'سیٹنگز' : 'Settings',
-            onPress: () => router.push('/settings'),
-          },
-          { text: language === 'ur' ? 'بعد میں' : 'Later', style: 'cancel' },
-        ]
-      );
-      return;
-    }
-    router.push('/chat');
-  }, [hasApiKey, language]);
+  const handleCategoryChat = useCallback(
+    (section) => {
+      router.push({ pathname: '/chat', params: { section } });
+    },
+    []
+  );
 
   const renderQuickCard = useCallback(
     ({ item }) => (
@@ -110,6 +129,14 @@ export default function HomeScreen() {
     ),
     [handleQuickQuestion, language]
   );
+
+  if (checkingOnboarding) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={COLORS.primaryNavy} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -153,24 +180,12 @@ export default function HomeScreen() {
               </Text>
             </View>
           </View>
-          {!hasApiKey && (
-            <TouchableOpacity
-              style={styles.apiKeyBanner}
-              onPress={() => router.push('/settings')}
-            >
-              <Text style={styles.apiKeyBannerText}>
-                {language === 'ur'
-                  ? '⚠️ API Key درج کریں — سیٹنگز کھولیں'
-                  : '⚠️ Add API Key to start — Open Settings'}
-              </Text>
-            </TouchableOpacity>
-          )}
         </View>
 
         {/* Start Chat Button */}
         <TouchableOpacity
           style={styles.startChatBtn}
-          onPress={handleNewChat}
+          onPress={() => handleCategoryChat(SECTIONS.OTHER)}
           activeOpacity={0.85}
         >
           <Text style={styles.startChatIcon}>💬</Text>
@@ -209,6 +224,11 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>
             {language === 'ur' ? 'قانونی شعبے' : 'Legal Areas Covered'}
           </Text>
+          <Text style={styles.sectionSubtitle}>
+            {language === 'ur'
+              ? 'ہر شعبے کی الگ بات چیت'
+              : 'Each category has its own chat'}
+          </Text>
         </View>
 
         <View style={styles.featuresGrid}>
@@ -216,7 +236,7 @@ export default function HomeScreen() {
             <TouchableOpacity
               key={i}
               style={styles.featureCard}
-              onPress={handleNewChat}
+              onPress={() => handleCategoryChat(f.section)}
               activeOpacity={0.75}
             >
               <Text style={styles.featureIcon}>{f.icon}</Text>
@@ -226,6 +246,11 @@ export default function HomeScreen() {
               <Text style={[styles.featureDesc, language === 'ur' && styles.urduText]}>
                 {language === 'ur' ? f.descUr : f.descEn}
               </Text>
+              <View style={styles.chatBadge}>
+                <Text style={styles.chatBadgeText}>
+                  {language === 'ur' ? 'چیٹ ›' : 'Chat ›'}
+                </Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
@@ -237,6 +262,14 @@ export default function HomeScreen() {
               ? '⚠️ یہ ایپ عمومی قانونی معلومات فراہم کرتی ہے۔ پیچیدہ معاملات کے لیے وکیل سے رابطہ کریں۔'
               : '⚠️ This app provides general legal information only. For complex matters, consult a qualified lawyer.'}
           </Text>
+        </View>
+
+        {/* Creator Credit */}
+        <View style={styles.creatorFooter}>
+          <Text style={[styles.creatorTag, language === 'ur' && styles.urduText]}>
+            {language === 'ur' ? 'ایڈووکیٹ اور اے آئی سے تقویت یافتہ' : 'Advocate & AI Powered'}
+          </Text>
+          <Text style={styles.creatorName}>Mr. Chachar (Advocate)</Text>
         </View>
 
         <View style={{ height: insets.bottom + 20 }} />
@@ -302,19 +335,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
   },
-  apiKeyBanner: {
-    marginTop: 14,
-    backgroundColor: 'rgba(201,168,76,0.2)',
-    borderRadius: 8,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: COLORS.goldAccent,
-  },
-  apiKeyBannerText: {
-    color: COLORS.goldAccent,
-    fontSize: 13,
-    textAlign: 'center',
-  },
   startChatBtn: {
     marginHorizontal: 16,
     marginBottom: 24,
@@ -352,6 +372,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
+  sectionSubtitle: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
   quickList: {
     paddingHorizontal: 16,
     paddingBottom: 8,
@@ -386,11 +411,24 @@ const styles = StyleSheet.create({
   featureDesc: {
     fontSize: 12,
     color: COLORS.textSecondary,
+    marginBottom: 10,
+  },
+  chatBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.primaryNavy,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  chatBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '600',
   },
   urduText: { textAlign: 'right' },
   disclaimer: {
     marginHorizontal: 16,
-    marginBottom: 8,
+    marginBottom: 16,
     backgroundColor: 'rgba(245,158,11,0.1)',
     borderRadius: 10,
     padding: 14,
@@ -401,5 +439,26 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: 12,
     lineHeight: 18,
+  },
+  creatorFooter: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginBottom: 4,
+  },
+  creatorTag: {
+    fontSize: 11,
+    color: COLORS.goldAccent,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  creatorText: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+  },
+  creatorName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.primaryNavy,
+    marginTop: 2,
   },
 });

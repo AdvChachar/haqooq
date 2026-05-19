@@ -91,7 +91,7 @@ export default function SplashScreen() {
       </Animated.View>
 
       <Animated.Text style={[styles.bottomText, { opacity: taglineOpacity }]}>
-        Balochistan Legal Aid Initiative
+        Pakistan Legal Aid Initiative
       </Animated.Text>
     </View>
   );

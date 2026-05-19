@@ -19,16 +19,54 @@ import TypingIndicator from '../components/TypingIndicator';
 import COLORS from '../constants/colors';
 import { sendMessageToGemini, getErrorMessage } from '../utils/geminiAPI';
 import {
-  getApiKey,
   getLanguage,
   getChatHistory,
   saveChatHistory,
   clearChatHistory,
+  SECTIONS,
 } from '../utils/storage';
 import { detectLanguage } from '../utils/languageDetect';
 
 const generateId = () =>
   `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+const SECTION_INFO = {
+  [SECTIONS.FAMILY]: {
+    icon: '👩‍⚖️',
+    titleEn: 'Family Law',
+    titleUr: 'خاندانی قانون',
+    welcomeEn: 'Assalam-o-Alaikum! I am Haqooq AI.\n\nAsk me anything about Family Law — marriage, divorce, custody, inheritance, and more.\n\nHow can I help you today?',
+    welcomeUr: 'السلام علیکم! میں حقوق AI ہوں۔\n\nخاندانی قانون کے بارے میں سوال پوچھیں — نکاح، طلاق، حضانت، وراثت وغیرہ۔\n\nآپ کا کیا سوال ہے؟',
+  },
+  [SECTIONS.CRIMINAL]: {
+    icon: '📋',
+    titleEn: 'Criminal Law',
+    titleUr: 'فوجداری قانون',
+    welcomeEn: 'Assalam-o-Alaikum! I am Haqooq AI.\n\nAsk me anything about Criminal Law — FIR filing, bail, arrests, and your rights.\n\nHow can I help you today?',
+    welcomeUr: 'السلام علیکم! میں حقوق AI ہوں۔\n\nفوجداری قانون کے بارے میں سوال پوچھیں — ایف آئی آر، ضمانت، گرفتاری اور آپ کے حقوق۔\n\nآپ کا کیا سوال ہے؟',
+  },
+  [SECTIONS.PROPERTY]: {
+    icon: '🏠',
+    titleEn: 'Property Law',
+    titleUr: 'جائیداد کا قانون',
+    welcomeEn: 'Assalam-o-Alaikum! I am Haqooq AI.\n\nAsk me anything about Property Law — land rights, disputes, registration, and more.\n\nHow can I help you today?',
+    welcomeUr: 'السلام علیکم! میں حقوق AI ہوں۔\n\nجائیداد کے قانون کے بارے میں سوال پوچھیں — زمین کے حقوق، تنازعات، رجسٹریشن وغیرہ۔\n\nآپ کا کیا سوال ہے؟',
+  },
+  [SECTIONS.LABOR]: {
+    icon: '👷',
+    titleEn: 'Labor Law',
+    titleUr: 'مزدور قانون',
+    welcomeEn: 'Assalam-o-Alaikum! I am Haqooq AI.\n\nAsk me anything about Labor Law — worker rights, wages, termination, and more.\n\nHow can I help you today?',
+    welcomeUr: 'السلام علیکم! میں حقوق AI ہوں۔\n\nمزدور قانون کے بارے میں سوال پوچھیں — مزدور کے حقوق، تنخواہ، ملازمت وغیرہ۔\n\nآپ کا کیا سوال ہے؟',
+  },
+  [SECTIONS.OTHER]: {
+    icon: '⚖️',
+    titleEn: 'Haqooq AI',
+    titleUr: 'حقوق AI',
+    welcomeEn: "Assalam-o-Alaikum! I am Haqooq AI, your legal aid assistant.\n\nAsk me anything about Pakistani law — FIR filing, bail, divorce, CNIC, labor rights, women's rights, and more.\n\nHow can I help you today?",
+    welcomeUr: 'السلام علیکم! میں حقوق AI ہوں۔ آپ کا قانونی مددگار۔\n\nآپ مجھ سے پاکستانی قانون کے بارے میں کوئی بھی سوال پوچھ سکتے ہیں — جیسے ایف آئی آر، ضمانت، طلاق، شناختی کارڈ، مزدور کے حقوق، وغیرہ۔\n\nآپ کا کیا سوال ہے؟',
+  },
+};
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
@@ -37,14 +75,15 @@ export default function ChatScreen() {
   const initialQuestionSent = useRef(false);
   const messagesRef = useRef([]);
 
+  const section = params?.section || SECTIONS.OTHER;
+  const sectionInfo = SECTION_INFO[section] || SECTION_INFO[SECTIONS.OTHER];
+
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [language, setLanguage] = useState('ur');
-  const [apiKey, setApiKey] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Keep ref in sync with state for use inside callbacks
   const updateMessages = (newMessages) => {
     messagesRef.current = newMessages;
     setMessages(newMessages);
@@ -52,21 +91,19 @@ export default function ChatScreen() {
 
   useEffect(() => {
     initChat();
-  }, []);
+  }, [section]);
 
   const scrollToBottom = () => {
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
   const initChat = async () => {
-    const [lang, key, history] = await Promise.all([
+    const [lang, history] = await Promise.all([
       getLanguage(),
-      getApiKey(),
-      getChatHistory(),
+      getChatHistory(section),
     ]);
 
     setLanguage(lang);
-    setApiKey(key);
 
     let initial = [];
 
@@ -76,10 +113,7 @@ export default function ChatScreen() {
       const welcomeMsg = {
         id: generateId(),
         role: 'assistant',
-        content:
-          lang === 'ur'
-            ? 'السلام علیکم! میں حقوق AI ہوں۔ آپ کا قانونی مددگار۔\n\nآپ مجھ سے پاکستانی قانون کے بارے میں کوئی بھی سوال پوچھ سکتے ہیں — جیسے ایف آئی آر، ضمانت، طلاق، شناختی کارڈ، مزدور کے حقوق، وغیرہ۔\n\nآپ کا کیا سوال ہے؟'
-            : "Assalam-o-Alaikum! I am Haqooq AI, your legal aid assistant.\n\nAsk me anything about Pakistani law — FIR filing, bail, divorce, CNIC, labor rights, women's rights, and more.\n\nHow can I help you today?",
+        content: lang === 'ur' ? sectionInfo.welcomeUr : sectionInfo.welcomeEn,
         timestamp: Date.now(),
       };
       initial = [welcomeMsg];
@@ -91,40 +125,19 @@ export default function ChatScreen() {
     if (params?.initialQuestion && !initialQuestionSent.current) {
       initialQuestionSent.current = true;
       setTimeout(() => {
-        handleSend(params.initialQuestion, key, lang, initial);
+        handleSend(params.initialQuestion, lang, initial);
       }, 600);
     }
   };
 
   const handleSend = useCallback(
-    async (textOverride, keyOverride, langOverride, messagesOverride) => {
+    async (textOverride, langOverride, messagesOverride) => {
       const msgText = (textOverride || inputText).trim();
-      const activeKey = keyOverride !== undefined ? keyOverride : apiKey;
       const activeLang = langOverride || language;
       const currentMessages =
         messagesOverride !== undefined ? messagesOverride : messagesRef.current;
 
       if (!msgText) return;
-
-      if (!activeKey) {
-        Alert.alert(
-          activeLang === 'ur' ? 'API Key درکار ہے' : 'API Key Required',
-          activeLang === 'ur'
-            ? 'براہ کرم سیٹنگز میں اپنی Gemini API Key درج کریں۔'
-            : 'Please add your Gemini API Key in Settings.',
-          [
-            {
-              text: activeLang === 'ur' ? 'سیٹنگز' : 'Settings',
-              onPress: () => router.push('/settings'),
-            },
-            {
-              text: activeLang === 'ur' ? 'ٹھیک ہے' : 'OK',
-              style: 'cancel',
-            },
-          ]
-        );
-        return;
-      }
 
       const userMsg = {
         id: generateId(),
@@ -135,7 +148,7 @@ export default function ChatScreen() {
 
       const withUser = [...currentMessages, userMsg];
       updateMessages(withUser);
-      saveChatHistory(withUser);
+      saveChatHistory(withUser, section);
 
       if (!textOverride) setInputText('');
       setIsTyping(true);
@@ -149,8 +162,7 @@ export default function ChatScreen() {
 
         const responseText = await sendMessageToGemini(
           msgText,
-          historyForApi,
-          activeKey
+          historyForApi
         );
 
         const aiMsg = {
@@ -162,7 +174,7 @@ export default function ChatScreen() {
 
         const withAi = [...withUser, aiMsg];
         updateMessages(withAi);
-        saveChatHistory(withAi);
+        saveChatHistory(withAi, section);
       } catch (error) {
         const detectedLang = detectLanguage(msgText);
         const errorText = getErrorMessage(error.message, detectedLang);
@@ -182,7 +194,7 @@ export default function ChatScreen() {
         scrollToBottom();
       }
     },
-    [inputText, apiKey, language]
+    [inputText, language, section]
   );
 
   const handleClearChat = () => {
@@ -196,7 +208,7 @@ export default function ChatScreen() {
           text: language === 'ur' ? 'ہاں' : 'Yes',
           style: 'destructive',
           onPress: async () => {
-            await clearChatHistory();
+            await clearChatHistory(section);
             initialQuestionSent.current = false;
             updateMessages([]);
             initChat();
@@ -229,13 +241,15 @@ export default function ChatScreen() {
     >
       <StatusBar style="light" />
 
-      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>⚖️ حقوق AI</Text>
+          <Text style={styles.headerTitle}>
+            {sectionInfo.icon}{' '}
+            {language === 'ur' ? sectionInfo.titleUr : sectionInfo.titleEn}
+          </Text>
           <View style={styles.onlineIndicator}>
             <View style={styles.onlineDot} />
             <Text style={styles.onlineText}>
@@ -248,7 +262,6 @@ export default function ChatScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Messages List */}
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -262,7 +275,6 @@ export default function ChatScreen() {
         ListFooterComponent={isTyping ? <TypingIndicator /> : null}
       />
 
-      {/* Input Bar */}
       <View
         style={[styles.inputContainer, { paddingBottom: insets.bottom + 8 }]}
       >

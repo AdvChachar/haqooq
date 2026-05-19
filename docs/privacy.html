@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy - Haqooq</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.6;
+    }
+    .header {
+      background: linear-gradient(135deg, #1b3a5c 0%, #0f2a44 100%);
+      color: #fff;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .header h1 { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+    .header p { font-size: 14px; opacity: 0.8; }
+    .lang-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .lang-btn {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: 2px solid transparent;
+      padding: 6px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-btn.active {
+      background: #d4a843;
+      border-color: #d4a843;
+      color: #1b3a5c;
+    }
+    .lang-btn:hover { background: rgba(255,255,255,0.25); }
+    .lang-btn.active:hover { background: #c99a33; }
+    .content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    .last-updated {
+      font-size: 13px;
+      color: #888;
+      font-style: italic;
+      margin-bottom: 28px;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1b3a5c;
+      margin-top: 28px;
+      margin-bottom: 10px;
+    }
+    p { font-size: 15px; margin-bottom: 8px; color: #333; }
+    .urdu { direction: rtl; text-align: right; font-size: 16px; }
+    .urdu h2 { text-align: right; }
+    .urdu p { text-align: right; }
+    .hidden { display: none; }
+    .footer {
+      text-align: center;
+      padding: 24px 20px;
+      color: #888;
+      font-size: 13px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .footer a { color: #1b3a5c; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>&#x2696;&#xFE0F; Haqooq</h1>
+    <p id="header-sub">Privacy Policy</p>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-en" onclick="switchLang('en')">English</button>
+      <button class="lang-btn" id="btn-ur" onclick="switchLang('ur')">اردو</button>
+    </div>
+  </div>
+
+  <div class="content" id="content-en">
+    <p class="last-updated">Last Updated: May 2026</p>
+
+    <h2>1. Introduction</h2>
+    <p>Haqooq app ("we", "our") is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your information when you use our app.</p>
+
+    <h2>2. Information We Collect</h2>
+    <p>2.1 Chat History: Your conversations and legal questions are stored locally on your device.</p>
+    <p>2.2 Language Preference: Your selected language (Urdu/English) is stored locally.</p>
+    <p>2.3 We do not collect your name, email, phone number, or any personal identifiers.</p>
+
+    <h2>3. How We Use Your Information</h2>
+    <p>3.1 Your questions are sent to Google Gemini AI to generate responses.</p>
+    <p>3.2 Chat history is stored only so you can revisit past conversations.</p>
+    <p>3.3 We do not sell or share your data with any third party.</p>
+
+    <h2>4. Data Storage</h2>
+    <p>All data is stored locally on your device (in AsyncStorage). We have no access to your data. When you uninstall the app, all data is automatically deleted.</p>
+
+    <h2>5. Third-Party Services</h2>
+    <p>We use AI to generate responses to your legal questions. Your messages are processed on Google's servers. Please review Google's privacy policy.</p>
+
+    <h2>6. Data Control</h2>
+    <p>You can delete your chat history at any time from Settings.</p>
+
+    <h2>7. Contact Us</h2>
+    <p>If you have any questions about this policy, please reach out through the app.</p>
+
+    <h2>8. Changes</h2>
+    <p>We may update this policy occasionally. Check back regularly for changes.</p>
+  </div>
+
+  <div class="content urdu hidden" id="content-ur">
+    <p class="last-updated">آخری اپ ڈیٹ: مئی 2026</p>
+
+    <h2>1. تعارف</h2>
+    <p>حقوق ایپ ("ہم"، "ہماری") آپ کی رازداری کے تحفظ کے لیے پرعزم ہے۔ یہ پالیسی وضاحت کرتی ہے کہ ہم آپ کی معلومات کو کیسے جمع، استعمال اور محفوظ کرتے ہیں جب آپ ہماری ایپ استعمال کرتے ہیں۔</p>
+
+    <h2>2. ہم کون سی معلومات جمع کرتے ہیں</h2>
+    <p>2.1 چیٹ کی تاریخ: آپ کی گفتگو اور قانونی سوالات آپ کے آلے پر مقامی طور پر محفوظ ہوتے ہیں۔</p>
+    <p>2.2 زبان کی ترجیح: آپ کی منتخب کردہ زبان (اردو/انگریزی) مقامی طور پر محفوظ ہوتی ہے۔</p>
+    <p>2.3 ہم آپ کا نام، ای میل، فون نمبر، یا ذاتی شناخت کنندگان جمع نہیں کرتے۔</p>
+
+    <h2>3. ہم آپ کی معلومات کیسے استعمال کرتے ہیں</h2>
+    <p>3.1 آپ کے سوالات Google Gemini AI کو جوابات پیدا کرنے کے لیے بھیجے جاتے ہیں۔</p>
+    <p>3.2 چیٹ کی تاریخ صرف اس لیے محفوظ کی جاتی ہے تاکہ آپ اپنی پچھلی گفتگو دیکھ سکیں۔</p>
+    <p>3.3 ہم آپ کے ڈیٹا کو کسی تیسرے فریق کو فروخت یا شیئر نہیں کرتے۔</p>
+
+    <h2>4. ڈیٹا اسٹوریج</h2>
+    <p>تمام ڈیٹا صرف آپ کے آلے پر مقامی طور پر (AsyncStorage میں) محفوظ ہوتا ہے۔ ہمارے پاس آپ کے ڈیٹا تک رسائی نہیں ہے۔ جب آپ ایپ کو ان انسٹال کرتے ہیں تو تمام ڈیٹا خود بخود حذف ہو جاتا ہے۔</p>
+
+    <h2>5. تیسرے فریق کی خدمات</h2>
+    <p>ہم آپ کے قانونی سوالات کے جوابات پیدا کرنے کے لیے AI استعمال کرتے ہیں۔ آپ کے پیغامات Google کے سرورز پر کارروائی ہوتے ہیں۔ براہ کرم Google کی رازداری کی پالیسی دیکھیں۔</p>
+
+    <h2>6. ڈیٹا کنٹرول</h2>
+    <p>آپ سیٹنگز میں جا کر کسی بھی وقت اپنی چیٹ کی تاریخ کو حذف کر سکتے ہیں۔</p>
+
+    <h2>7. ہم سے رابطہ</h2>
+    <p>اگر آپ کو اس پالیسی کے بارے میں کوئی سوال ہے تو براہ کرم ایپ کے ذریعے رابطہ کریں۔</p>
+
+    <h2>8. تبدیلیاں</h2>
+    <p>ہم اس پالیسی کو کبھی کبھار اپ ڈیٹ کر سکتے ہیں۔ تبدیلیوں کے لیے باقاعدگی سے چیک کریں۔</p>
+  </div>
+
+  <div class="footer">
+    <p><a href="https://github.com/mrchachar/haqooq">Haqooq on GitHub</a></p>
+  </div>
+
+  <script>
+    function switchLang(lang) {
+      document.getElementById('content-en').classList.toggle('hidden', lang !== 'en');
+      document.getElementById('content-ur').classList.toggle('hidden', lang !== 'ur');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.getElementById('btn-ur').classList.toggle('active', lang === 'ur');
+      document.getElementById('header-sub').textContent = lang === 'ur' ? 'رازداری کی پالیسی' : 'Privacy Policy';
+    }
+  </script>
+</body>
+</html>

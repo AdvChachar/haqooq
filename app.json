@@ -3,46 +3,40 @@
     "name": "Haqooq",
     "slug": "haqooq",
     "version": "1.0.0",
+    "description": "Haqooq is a free AI-powered legal aid app for Pakistani citizens. Get simple answers about Pakistani laws — FIR filing, bail, family law, property rights, labor law, and more. Available in Urdu and English.",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "privacy": "public",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#273444"
+      "backgroundColor": "#071440"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.haqooq.legalaid"
+      "bundleIdentifier": "com.haqooq.legalaid",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#273444"
+        "backgroundColor": "#071440"
       },
       "package": "com.haqooq.legalaid",
-      "versionCode": 1,
-      "permissions": [
-        "android.permission.INTERNET",
-        "android.permission.RECORD_AUDIO"
-      ]
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router",
-      "expo-font",
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Allow Haqooq to access your photos."
-        }
-      ]
+      "expo-font"
     ],
     "scheme": "haqooq",
     "experiments": {
